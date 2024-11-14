@@ -5,9 +5,19 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     public Rigidbody rb;
-    public float moveSpeed = 5f;        // Speed at which the player moves
-    public float jumpForce = 10f;       // Force applied for jumping
-    public bool isGrounded = false;     // To check if the player is on the ground
+    float moveSpeed = 2;
+    float rotationSpeed = 4;
+    float runningSpeed;
+    float vaxis, haxis;
+    public bool isJumping, isJumpingAlt, isGrounded = false;
+    Vector3 movement;
+
+    
+    public KeyCode moveForwardKey;  // key to move forward
+    public KeyCode moveBackwardKey; // key to move back
+    public KeyCode moveLeftKey;     // key to move left
+    public KeyCode moveRightKey;    // key to move right
+    public KeyCode jumpKey;         // key to jump
 
     // Start is called before the first frame update
     void Start()
@@ -18,22 +28,62 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // WASD
-        if (Input.GetKeyDown(KeyCode.W)) 
+        /*  Controller Mappings */
+        vaxis = Input.GetAxis("Vertical");
+        haxis = Input.GetAxis("Horizontal");
+        isJumping = Input.GetButton("Jump");
+        isJumpingAlt = Input.GetKey(KeyCode.Joystick1Button0);
+
+        //Simplified...
+        runningSpeed = vaxis;
+
+
+        if (isGrounded)
         {
+            movement = new Vector3(0, 0f, runningSpeed * 8);        // Multiplier of 8 seems to work well with Rigidbody Mass of 1.
+            movement = transform.TransformDirection(movement);      // transform correction A.K.A. "Move the way we are facing"
+        }
+        else
+        {
+            movement *= 0.70f;                                      // Dampen the movement vector while mid-air
+        }
+
+        GetComponent<Rigidbody>().AddForce(movement * moveSpeed);   // Movement Force
+
+
+        if ((isJumping || isJumpingAlt) && isGrounded)
+        {
+            Debug.Log(this.ToString() + " isJumping = " + isJumping);
+            GetComponent<Rigidbody>().AddForce(Vector3.up * 150);
+        }
+
+
+
+        if ((Input.GetAxis("Vertical") != 0f || Input.GetAxis("Horizontal") != 0f) && !isJumping && isGrounded)
+        {
+            if (Input.GetAxis("Vertical") >= 0)
+                transform.Rotate(new Vector3(0, haxis * rotationSpeed, 0));
+            else
+                transform.Rotate(new Vector3(0, -haxis * rotationSpeed, 0));
 
         }
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            rb.velocity = new Vector3(-moveSpeed, rb.velocity.y, 0);  // Move left
-        }
-        if (Input.GetKeyDown(KeyCode.S))
-        {
+    }
 
-        }
-        if (Input.GetKeyDown(KeyCode.D))
+    void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log("Entered");
+        if (collision.gameObject.CompareTag("Ground"))
         {
+            isGrounded = true;
+        }
+    }
 
+    void OnCollisionExit(Collision collision)
+    {
+        Debug.Log("Exited");
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = false;
         }
     }
 }
