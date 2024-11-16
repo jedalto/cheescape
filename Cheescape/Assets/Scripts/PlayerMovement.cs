@@ -4,86 +4,55 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public Rigidbody rb;
-    float moveSpeed = 2;
-    float rotationSpeed = 4;
-    float runningSpeed;
-    float vaxis, haxis;
-    public bool isJumping, isJumpingAlt, isGrounded = false;
-    Vector3 movement;
+    public CharacterController controller;
+    public Transform cam;
 
-    
-    public KeyCode moveForwardKey;  // key to move forward
-    public KeyCode moveBackwardKey; // key to move back
-    public KeyCode moveLeftKey;     // key to move left
-    public KeyCode moveRightKey;    // key to move right
-    public KeyCode jumpKey;         // key to jump
+    public float speed = 6f;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public float turnSmoothTime = 0.1f;
+    float turnSmoothVelocity;
+
+    //public bool isJumping, isJumpingAlt, isGrounded = false;
+
+    //// Start is called before the first frame update
+    //void Start()
+    //{
+
+    //}
 
     // Update is called once per frame
     void Update()
     {
-        /*  Controller Mappings */
-        vaxis = Input.GetAxis("Vertical");
-        haxis = Input.GetAxis("Horizontal");
-        isJumping = Input.GetButton("Jump");
-        isJumpingAlt = Input.GetKey(KeyCode.Joystick1Button0);
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
+        Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
 
-        //Simplified...
-        runningSpeed = vaxis;
-
-
-        if (isGrounded)
+        if (direction.magnitude >= 0.1f)
         {
-            movement = new Vector3(0, 0f, runningSpeed * 8);        // Multiplier of 8 seems to work well with Rigidbody Mass of 1.
-            movement = transform.TransformDirection(movement);      // transform correction A.K.A. "Move the way we are facing"
-        }
-        else
-        {
-            movement *= 0.70f;                                      // Dampen the movement vector while mid-air
-        }
+            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
+            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
+            transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
-        GetComponent<Rigidbody>().AddForce(movement * moveSpeed);   // Movement Force
-
-
-        if ((isJumping || isJumpingAlt) && isGrounded)
-        {
-            Debug.Log(this.ToString() + " isJumping = " + isJumping);
-            GetComponent<Rigidbody>().AddForce(Vector3.up * 150);
-        }
-
-
-
-        if ((Input.GetAxis("Vertical") != 0f || Input.GetAxis("Horizontal") != 0f) && !isJumping && isGrounded)
-        {
-            if (Input.GetAxis("Vertical") >= 0)
-                transform.Rotate(new Vector3(0, haxis * rotationSpeed, 0));
-            else
-                transform.Rotate(new Vector3(0, -haxis * rotationSpeed, 0));
-
+            Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+            controller.Move(moveDir.normalized * speed * Time.deltaTime);
         }
     }
 
-    void OnCollisionEnter(Collision collision)
-    {
-        Debug.Log("Entered");
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = true;
-        }
-    }
+    //void OnCollisionEnter(Collision collision)
+    //{
+    //    Debug.Log("Entered");
+    //    if (collision.gameObject.CompareTag("Ground"))
+    //    {
+    //        isGrounded = true;
+    //    }
+    //}
 
-    void OnCollisionExit(Collision collision)
-    {
-        Debug.Log("Exited");
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = false;
-        }
-    }
+    //void OnCollisionExit(Collision collision)
+    //{
+    //    Debug.Log("Exited");
+    //    if (collision.gameObject.CompareTag("Ground"))
+    //    {
+    //        isGrounded = false;
+    //    }
+    //}
 }
