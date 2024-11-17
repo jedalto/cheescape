@@ -1,37 +1,38 @@
 using UnityEngine;
-
 public class PlayerMovement : MonoBehaviour
 {
     // movement vars
     public float moveSpeed = 5f;
     public float rotateSpeed = 180f;
     public float jumpForce = 5f;
-
     // camera vars
     public Camera playerCamera;
     public float cameraHeight = 2f;
     public float cameraDistance = 5f;
     public float cameraSmoothSpeed = 5f;
-
+    public float cameraXAngle = 15f; // New variable for fixed X rotation
+    public Transform lookTarget;
     // ground checking
     public float groundCheckDistance = 0.3f;
     public LayerMask groundLayer;
-
     private Rigidbody rb;
     private Transform cameraTransform;
     private Vector3 movement;
     public bool isGrounded;
 
+    // animator components
+    public Animator animator;
+    public bool speed;
+    
+
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
-
         if (rb != null)
         {
             rb.freezeRotation = true;
             rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
         }
-
         if (playerCamera != null)
         {
             cameraTransform = playerCamera.transform;
@@ -42,18 +43,20 @@ public class PlayerMovement : MonoBehaviour
     private void Update()
     {
         CheckGrounded();
-
         // Get input
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
 
-        // Store movement for use in FixedUpdate
-        movement = transform.forward * verticalInput;
+        movement = new Vector3(verticalInput, 0f, 0f).normalized;
+
+        // Transform the movement direction based on current rotation
+        movement = transform.TransformDirection(movement);
 
         // Handle rotation
         if (horizontalInput != 0)
         {
-            transform.Rotate(Vector3.up * horizontalInput * rotateSpeed * Time.deltaTime);
+            Quaternion deltaRotation = Quaternion.Euler(0f, horizontalInput * rotateSpeed * Time.deltaTime, 0f);
+            rb.MoveRotation(rb.rotation * deltaRotation);
         }
 
         // Handle jumping
@@ -63,11 +66,16 @@ public class PlayerMovement : MonoBehaviour
         }
 
         UpdateCamera();
+
+        // Calculate magnitude of movement
+        float currentSpeed = movement.magnitude;
+        speed = isGrounded && currentSpeed != 0;
+        // Update Animator's Speed parameter
+        animator.SetBool("Speed", speed);
     }
 
     private void CheckGrounded()
     {
-        // Cast a ray straight down to check if we're grounded
         isGrounded = Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, groundCheckDistance + 0.1f, groundLayer);
     }
 
@@ -76,13 +84,11 @@ public class PlayerMovement : MonoBehaviour
         if (movement != Vector3.zero)
         {
             Vector3 targetVelocity = movement * moveSpeed;
-            // Preserve current vertical velocity
             targetVelocity.y = rb.velocity.y;
             rb.velocity = targetVelocity;
         }
         else
         {
-            // Keep vertical velocity but zero out horizontal movement
             rb.velocity = new Vector3(0f, rb.velocity.y, 0f);
         }
     }
@@ -91,19 +97,35 @@ public class PlayerMovement : MonoBehaviour
     {
         if (playerCamera != null)
         {
-            Vector3 targetPosition = transform.position - transform.forward * cameraDistance + Vector3.up * cameraHeight;
-            Quaternion targetRotation = Quaternion.LookRotation(transform.position - targetPosition);
+            // Calculate the desired position behind the player
+            Vector3 forwardDirection = Vector3.right;
+            forwardDirection = transform.TransformDirection(forwardDirection);
+            Vector3 targetPosition = transform.position - forwardDirection * cameraDistance + Vector3.up * cameraHeight;
 
+            // Smoothly move the camera to the target position
             cameraTransform.position = Vector3.Lerp(cameraTransform.position, targetPosition, Time.deltaTime * cameraSmoothSpeed);
+
+            // Calculate rotation with fixed X angle
+            Vector3 directionToPlayer = transform.position - cameraTransform.position;
+            float desiredYRotation = Mathf.Atan2(directionToPlayer.x, directionToPlayer.z) * Mathf.Rad2Deg;
+            Quaternion targetRotation = Quaternion.Euler(cameraXAngle, desiredYRotation, 0);
+
+            // Smoothly rotate the camera
             cameraTransform.rotation = Quaternion.Lerp(cameraTransform.rotation, targetRotation, Time.deltaTime * cameraSmoothSpeed);
         }
     }
 
     private void UpdateCameraPosition()
     {
-        Vector3 targetPosition = transform.position - transform.forward * cameraDistance + Vector3.up * cameraHeight;
+        Vector3 forwardDirection = Vector3.right;
+        forwardDirection = transform.TransformDirection(forwardDirection);
+        Vector3 targetPosition = transform.position - forwardDirection * cameraDistance + Vector3.up * cameraHeight;
         cameraTransform.position = targetPosition;
-        cameraTransform.LookAt(transform.position);
+
+        // Set initial rotation with fixed X angle
+        Vector3 directionToPlayer = transform.position - cameraTransform.position;
+        float desiredYRotation = Mathf.Atan2(directionToPlayer.x, directionToPlayer.z) * Mathf.Rad2Deg;
+        cameraTransform.rotation = Quaternion.Euler(cameraXAngle, desiredYRotation, 0);
     }
 }
 
