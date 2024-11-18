@@ -1,18 +1,25 @@
 using UnityEngine;
+using Cinemachine; // Include this if using Cinemachine
+
 public class PlayerMovement : MonoBehaviour
 {
-    // movement vars
+    // Movement variables
     public float moveSpeed = 5f;
     public float rotateSpeed = 180f;
     public float jumpForce = 5f;
-    // camera vars
-    public Camera playerCamera;
+
+    // Camera variables
+    public Camera playerCamera; // Your custom camera
+    public CinemachineFreeLook cinemachineCamera; // Cinemachine camera
+    private bool usingCinemachineCamera = false; // Tracks active camera
+
     public float cameraHeight = 2f;
     public float cameraDistance = 5f;
     public float cameraSmoothSpeed = 5f;
     public float cameraXAngle = 15f; // New variable for fixed X rotation
     public Transform lookTarget;
-    // ground checking
+
+    // Ground checking
     public float groundCheckDistance = 0.3f;
     public LayerMask groundLayer;
     private Rigidbody rb;
@@ -20,10 +27,9 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 movement;
     public bool isGrounded;
 
-    // animator components
+    // Animator components
     public Animator animator;
     public bool speed;
-    
 
     private void Start()
     {
@@ -33,16 +39,25 @@ public class PlayerMovement : MonoBehaviour
             rb.freezeRotation = true;
             rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
         }
+
         if (playerCamera != null)
         {
             cameraTransform = playerCamera.transform;
             UpdateCameraPosition();
+        }
+
+        // Ensure the custom camera starts active
+        playerCamera.gameObject.SetActive(true);
+        if (cinemachineCamera != null)
+        {
+            cinemachineCamera.gameObject.SetActive(false);
         }
     }
 
     private void Update()
     {
         CheckGrounded();
+
         // Get input
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
@@ -65,11 +80,22 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
 
-        UpdateCamera();
+        // Camera update for custom camera
+        if (!usingCinemachineCamera)
+        {
+            UpdateCameraPosition();
+        }
+
+        // Handle camera swapping
+        if (Input.GetMouseButtonDown(1)) // Right mouse button
+        {
+            SwapCameras();
+        }
 
         // Calculate magnitude of movement
         float currentSpeed = movement.magnitude;
         speed = isGrounded && currentSpeed != 0;
+
         // Update Animator's Speed parameter
         animator.SetBool("Speed", speed);
     }
@@ -127,7 +153,33 @@ public class PlayerMovement : MonoBehaviour
         float desiredYRotation = Mathf.Atan2(directionToPlayer.x, directionToPlayer.z) * Mathf.Rad2Deg;
         cameraTransform.rotation = Quaternion.Euler(cameraXAngle, desiredYRotation, 0);
     }
+
+    private void SwapCameras()
+    {
+        usingCinemachineCamera = !usingCinemachineCamera;
+
+        if (!usingCinemachineCamera)
+        {
+            // Enable the custom camera and disable the Cinemachine virtual camera
+            playerCamera.gameObject.SetActive(true);
+            if (cinemachineCamera != null)
+            {
+                cinemachineCamera.gameObject.SetActive(false);
+            }
+        }
+        else
+        {
+            // Enable the Cinemachine virtual camera and disable the custom camera
+            playerCamera.gameObject.SetActive(false);
+            if (cinemachineCamera != null)
+            {
+                cinemachineCamera.gameObject.SetActive(true);
+            }
+        }
+    }
+
 }
+
 
 
 
