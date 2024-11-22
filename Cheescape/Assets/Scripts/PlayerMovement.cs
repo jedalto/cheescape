@@ -22,6 +22,9 @@ public class PlayerMovement : MonoBehaviour
     // Ground checking
     public float groundCheckDistance = 0.3f;
     public LayerMask groundLayer;
+    private Vector3[] cornerPositions; // Array to store corner positions of collider
+    public BoxCollider boxCollider;
+
     private Rigidbody rb;
     private Transform cameraTransform;
     private Vector3 movement;
@@ -52,6 +55,9 @@ public class PlayerMovement : MonoBehaviour
         {
             cinemachineCamera.gameObject.SetActive(false);
         }
+
+        boxCollider = GetComponent<BoxCollider>();
+        
     }
 
     private void Update()
@@ -100,9 +106,40 @@ public class PlayerMovement : MonoBehaviour
         animator.SetBool("Speed", speed);
     }
 
+    //private void CheckGrounded()
+    //{
+    //    isGrounded = Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, groundCheckDistance + 0.1f, groundLayer);
+    //}
+
     private void CheckGrounded()
     {
-        isGrounded = Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, groundCheckDistance + 0.1f, groundLayer);
+        isGrounded = false; // Default to not grounded
+
+        // Get the bounds of the collider
+        Bounds bounds = boxCollider.bounds;
+
+        // Calculate the corner positions
+        Vector3 bottomLeft = new Vector3(bounds.min.x, bounds.min.y, bounds.center.z);
+        Vector3 bottomRight = new Vector3(bounds.max.x, bounds.min.y, bounds.center.z);
+        Vector3 topLeft = new Vector3(bounds.min.x, bounds.min.y, bounds.max.z);
+        Vector3 topRight = new Vector3(bounds.max.x, bounds.min.y, bounds.max.z);
+
+        // List of corners to check
+        Vector3[] corners = { bottomLeft, bottomRight, topLeft, topRight };
+
+        foreach (Vector3 corner in corners)
+        {
+            // Perform raycast from each corner
+            bool hit = Physics.Raycast(corner + Vector3.up * 0.1f, Vector3.down, groundCheckDistance + 0.1f, groundLayer);
+            Debug.DrawRay(corner + Vector3.up * 0.1f, Vector3.down * (groundCheckDistance + 0.1f), hit ? Color.green : Color.red);
+
+            if (hit)
+            {
+                isGrounded = true; // Set grounded to true if any ray hits
+                Debug.Log("Grounded at: " + corner); // Log successful grounding
+                break;
+            }
+        }
     }
 
     private void FixedUpdate()
