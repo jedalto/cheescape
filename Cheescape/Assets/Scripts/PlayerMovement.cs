@@ -29,6 +29,7 @@ public class PlayerMovement : MonoBehaviour
     private Transform cameraTransform;
     private Vector3 movement;
     public bool isGrounded;
+    
 
     // Animator components
     public Animator animator;
@@ -102,8 +103,9 @@ public class PlayerMovement : MonoBehaviour
         float currentSpeed = movement.magnitude;
         speed = isGrounded && currentSpeed != 0;
 
-        // Update Animator's Speed parameter
+        // Update Animator parameters
         animator.SetBool("Speed", speed);
+        animator.SetBool("Jump", isGrounded);
     }
 
     //private void CheckGrounded()
