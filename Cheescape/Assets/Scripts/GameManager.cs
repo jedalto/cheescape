@@ -28,7 +28,10 @@ public class GameManager : MonoBehaviour
         menuButton = GameObject.FindGameObjectWithTag("ReturnToMenu").GetComponent<Button>();
         //quitButton = GameObject.FindGameObjectWithTag("QuitButton").GetComponent<Button>();
 
-        pausePanel.SetActive(false);
+        if (pausePanel != null)
+        {
+            pausePanel.SetActive(false);
+        }
 
         timeText = GameObject.Find("Timer").GetComponent<Text>(); ;
 
@@ -68,6 +71,13 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // Pause Game
+    public void pauseGame()
+    {
+        isPaused = true;
+        Time.timeScale = 0;
+        pausePanel.SetActive(true);
+    }
     // Resume Game Function
     public void resumeGame()
     {

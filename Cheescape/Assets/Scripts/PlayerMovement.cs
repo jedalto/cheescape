@@ -32,6 +32,8 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 movement;
     public bool isGrounded;
 
+    GameManager gameManager;
+
     // Animator components
     public Animator animator;
     public bool speed;
@@ -107,6 +109,15 @@ public class PlayerMovement : MonoBehaviour
         // Update Animator parameters
         animator.SetBool("Speed", speed);
         animator.SetBool("Jump", isGrounded);
+
+        if (Input.GetKeyDown(KeyCode.Escape) && !gameManager.isPaused) // Pause Game
+        {
+            gameManager.pauseGame();
+        }
+        if (Input.GetKeyDown(KeyCode.Escape) && gameManager.isPaused) // Resume Game
+        {
+            gameManager.resumeGame();
+        }
 
     }
 

@@ -983,13 +983,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7aa4f6c74654b8b4590b9f37b917790a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pausePanel: {fileID: 0}
+  pausePanel: {fileID: 1957493154}
   resumeButton: {fileID: 0}
   menuButton: {fileID: 0}
   isPaused: 0
   timeRemaining: 10
   timerIsRunning: 0
-  timeText: {fileID: 0}
+  timeText: {fileID: 1334402659}
 --- !u!4 &384507471
 Transform:
   m_ObjectHideFlags: 0
