@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Button resumeButton;
     [SerializeField] private Button menuButton;
     [SerializeField] private GameObject winPanel; // Add a reference to the win panel
+    [SerializeField] private GameObject losePanel;
     //[SerializeField] private Text youWin;
 
     public bool isPaused = false;
@@ -32,6 +33,10 @@ public class GameManager : MonoBehaviour
         if (winPanel != null)
         {
             winPanel.SetActive(false);
+        }
+        if (losePanel != null)
+        {
+            losePanel.SetActive(false);
         }
     }
 
@@ -123,9 +128,9 @@ public class GameManager : MonoBehaviour
                 }
 
                 // Show win panel if assigned
-                if (winPanel != null)
+                if (losePanel != null)
                 {
-                    winPanel.SetActive(true);
+                    losePanel.SetActive(true);
                 }
 
                 //if (youWin != null)
