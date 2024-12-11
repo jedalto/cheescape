@@ -62,10 +62,25 @@ public class PlayerMovement : MonoBehaviour
 
         boxCollider = GetComponent<BoxCollider>();
 
+        // Find GameManager if not already assigned
+        if (gameManager == null)
+        {
+            gameManager = FindObjectOfType<GameManager>();
+        }
+
     }
 
     private void Update()
     {
+        // Check if the game is paused or won before processing input
+        if (gameManager != null && (gameManager.isPaused || gameManager.isGameWon))
+        {
+            // Stop movement and animations
+            movement = Vector3.zero;
+            animator.SetBool("Speed", false);
+            return;
+        }
+
         CheckGrounded();
 
         // Get input
@@ -168,6 +183,13 @@ public class PlayerMovement : MonoBehaviour
         else
         {
             rb.velocity = new Vector3(0f, rb.velocity.y, 0f);
+        }
+
+        // Check if the game is paused or won before processing physics
+        if (gameManager != null && (gameManager.isPaused || gameManager.isGameWon))
+        {
+            rb.velocity = Vector3.zero;
+            return;
         }
     }
 

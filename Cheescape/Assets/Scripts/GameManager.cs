@@ -7,11 +7,17 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject pausePanel;
     [SerializeField] private Button resumeButton;
     [SerializeField] private Button menuButton;
+    [SerializeField] private GameObject winPanel; // Add a reference to the win panel
 
     public bool isPaused = false;
+    public bool isGameWon = false; // New flag to track game win state
+
     public float timeRemaining = 10;
     public bool timerIsRunning = false;
     public Text timeText;
+
+    // Reference to the player movement script
+    [SerializeField] private PlayerMovement playerMovement;
 
     void Awake()
     {
@@ -19,6 +25,12 @@ public class GameManager : MonoBehaviour
         if (pausePanel != null)
         {
             pausePanel.SetActive(false);
+        }
+
+        // Ensure win panel is initially inactive
+        if (winPanel != null)
+        {
+            winPanel.SetActive(false);
         }
     }
 
@@ -45,6 +57,12 @@ public class GameManager : MonoBehaviour
             timeText = GameObject.Find("Timer")?.GetComponent<Text>();
         }
 
+        // Find player movement script if not assigned
+        if (playerMovement == null)
+        {
+            playerMovement = FindObjectOfType<PlayerMovement>();
+        }
+
         // Ensure game starts unpaused
         Time.timeScale = 1;
 
@@ -65,8 +83,8 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        // Check for Escape key to toggle pause
-        if (Input.GetKeyDown(KeyCode.Escape))
+        // Check for Escape key to toggle pause (only if game is not won)
+        if (Input.GetKeyDown(KeyCode.Escape) && !isGameWon)
         {
             if (!isPaused)
             {
@@ -97,6 +115,8 @@ public class GameManager : MonoBehaviour
     // Pause Game
     public void pauseGame()
     {
+        if (isGameWon) return; // Can't pause if game is won
+
         isPaused = true;
         Time.timeScale = 0;
 
@@ -107,6 +127,12 @@ public class GameManager : MonoBehaviour
         else
         {
             Debug.LogWarning("Pause Panel is not assigned!");
+        }
+
+        // Disable player movement
+        if (playerMovement != null)
+        {
+            playerMovement.enabled = false;
         }
     }
 
@@ -120,6 +146,36 @@ public class GameManager : MonoBehaviour
         {
             pausePanel.SetActive(false);
         }
+
+        // Re-enable player movement
+        if (playerMovement != null)
+        {
+            playerMovement.enabled = true;
+        }
+    }
+
+    // Win Game Function
+    public void WinGame()
+    {
+        if (isGameWon) return; // Prevent multiple win calls
+
+        isGameWon = true;
+        timerIsRunning = false;
+        Time.timeScale = 0;
+
+        // Disable player movement
+        if (playerMovement != null)
+        {
+            playerMovement.enabled = false;
+        }
+
+        // Show win panel if assigned
+        if (winPanel != null)
+        {
+            winPanel.SetActive(true);
+        }
+
+        Debug.Log("You Win!");
     }
 
     // Return to Menu Function
