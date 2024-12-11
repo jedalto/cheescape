@@ -8,11 +8,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Button resumeButton;
     [SerializeField] private Button menuButton;
     [SerializeField] private GameObject winPanel; // Add a reference to the win panel
+    //[SerializeField] private Text youWin;
 
     public bool isPaused = false;
     public bool isGameWon = false; // New flag to track game win state
 
-    public float timeRemaining = 10;
+    public float timeRemaining = 600;
     public bool timerIsRunning = false;
     public Text timeText;
 
@@ -56,6 +57,11 @@ public class GameManager : MonoBehaviour
         {
             timeText = GameObject.Find("Timer")?.GetComponent<Text>();
         }
+
+        //if (youWin == null)
+        //{
+        //    youWin = GameObject.Find("YouWin")?.GetComponent<Text>();
+        //}
 
         // Find player movement script if not assigned
         if (playerMovement == null)
@@ -108,6 +114,24 @@ public class GameManager : MonoBehaviour
                 Debug.Log("Time has run out!");
                 timeRemaining = 0;
                 timerIsRunning = false;
+                isGameWon = true;
+                Time.timeScale = 0;
+                // Disable player movement
+                if (playerMovement != null)
+                {
+                    playerMovement.enabled = false;
+                }
+
+                // Show win panel if assigned
+                if (winPanel != null)
+                {
+                    winPanel.SetActive(true);
+                }
+
+                //if (youWin != null)
+                //{
+                //    youWin.text = "You Lose!";
+                //}
             }
         }
     }
