@@ -1,5 +1,7 @@
 using UnityEngine;
-using Cinemachine; // Include this if using Cinemachine
+using Cinemachine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement; // Include this if using Cinemachine
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -29,7 +31,8 @@ public class PlayerMovement : MonoBehaviour
     private Transform cameraTransform;
     private Vector3 movement;
     public bool isGrounded;
-    
+
+    GameManager gameManager;
 
     // Animator components
     public Animator animator;
@@ -58,7 +61,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         boxCollider = GetComponent<BoxCollider>();
-        
+
     }
 
     private void Update()
@@ -106,6 +109,16 @@ public class PlayerMovement : MonoBehaviour
         // Update Animator parameters
         animator.SetBool("Speed", speed);
         animator.SetBool("Jump", isGrounded);
+
+        if (Input.GetKeyDown(KeyCode.Escape) && !gameManager.isPaused) // Pause Game
+        {
+            gameManager.pauseGame();
+        }
+        if (Input.GetKeyDown(KeyCode.Escape) && gameManager.isPaused) // Resume Game
+        {
+            gameManager.resumeGame();
+        }
+
     }
 
     //private void CheckGrounded()
