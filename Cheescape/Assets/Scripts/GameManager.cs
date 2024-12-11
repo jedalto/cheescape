@@ -1,58 +1,81 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public GameObject pausePanel;
-    public Button resumeButton;
-    public Button menuButton;
-    //public Button quitButton;
+    [SerializeField] private GameObject pausePanel;
+    [SerializeField] private Button resumeButton;
+    [SerializeField] private Button menuButton;
 
-    public bool isPaused;
-
+    public bool isPaused = false;
     public float timeRemaining = 10;
     public bool timerIsRunning = false;
-
     public Text timeText;
 
-    // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
-        // Find references again after scene reload
-        pausePanel = GameObject.FindGameObjectWithTag("Pause");
-
-        resumeButton = GameObject.FindGameObjectWithTag("Resume").GetComponent<Button>();
-        menuButton = GameObject.FindGameObjectWithTag("ReturnToMenu").GetComponent<Button>();
-        //quitButton = GameObject.FindGameObjectWithTag("QuitButton").GetComponent<Button>();
-
+        // Ensure pause panel is initially inactive
         if (pausePanel != null)
         {
             pausePanel.SetActive(false);
         }
-
-        timeText = GameObject.Find("Timer").GetComponent<Text>(); ;
-
-        // Starts the timer automatically
-        timerIsRunning = true;
     }
 
-    // Update is called once per frame
+    void Start()
+    {
+        // Find references if not set in inspector
+        if (pausePanel == null)
+        {
+            pausePanel = GameObject.FindGameObjectWithTag("Pause");
+        }
+
+        if (resumeButton == null)
+        {
+            resumeButton = GameObject.FindGameObjectWithTag("Resume")?.GetComponent<Button>();
+        }
+
+        if (menuButton == null)
+        {
+            menuButton = GameObject.FindGameObjectWithTag("ReturnToMenu")?.GetComponent<Button>();
+        }
+
+        if (timeText == null)
+        {
+            timeText = GameObject.Find("Timer")?.GetComponent<Text>();
+        }
+
+        // Ensure game starts unpaused
+        Time.timeScale = 1;
+
+        // Start the timer automatically
+        timerIsRunning = true;
+
+        // Ensure buttons are linked to their respective methods
+        if (resumeButton != null)
+        {
+            resumeButton.onClick.AddListener(resumeGame);
+        }
+
+        if (menuButton != null)
+        {
+            menuButton.onClick.AddListener(returnToMenu);
+        }
+    }
+
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape) && !isPaused) // Pause Game
+        // Check for Escape key to toggle pause
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
-            isPaused = true;
-            Time.timeScale = 0;
-            pausePanel.SetActive(true);
-        }
-        if (Input.GetKeyDown(KeyCode.Escape) && isPaused) // Resume Game
-        {
-            isPaused = false;
-            Time.timeScale = 1;
-            pausePanel.SetActive(false);
+            if (!isPaused)
+            {
+                pauseGame();
+            }
+            else
+            {
+                resumeGame();
+            }
         }
 
         if (timerIsRunning)
@@ -76,33 +99,44 @@ public class GameManager : MonoBehaviour
     {
         isPaused = true;
         Time.timeScale = 0;
-        pausePanel.SetActive(true);
+
+        if (pausePanel != null)
+        {
+            pausePanel.SetActive(true);
+        }
+        else
+        {
+            Debug.LogWarning("Pause Panel is not assigned!");
+        }
     }
+
     // Resume Game Function
     public void resumeGame()
     {
         isPaused = false;
         Time.timeScale = 1;
-        pausePanel.SetActive(false);
+
+        if (pausePanel != null)
+        {
+            pausePanel.SetActive(false);
+        }
     }
+
     // Return to Menu Function
     public void returnToMenu()
     {
         SceneManager.LoadScene("MainMenu");
     }
-    //// Quit Game Function
-    //public void quitGame()
-    //{
-
-    //}
 
     void DisplayTime(float timeToDisplay)
     {
         timeToDisplay += 1;
-
         float minutes = Mathf.FloorToInt(timeToDisplay / 60);
         float seconds = Mathf.FloorToInt(timeToDisplay % 60);
 
-        timeText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+        if (timeText != null)
+        {
+            timeText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+        }
     }
 }

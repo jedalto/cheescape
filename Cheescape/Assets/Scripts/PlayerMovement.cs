@@ -110,14 +110,14 @@ public class PlayerMovement : MonoBehaviour
         animator.SetBool("Speed", speed);
         animator.SetBool("Jump", isGrounded);
 
-        if (Input.GetKeyDown(KeyCode.Escape) && !gameManager.isPaused) // Pause Game
-        {
-            gameManager.pauseGame();
-        }
-        if (Input.GetKeyDown(KeyCode.Escape) && gameManager.isPaused) // Resume Game
-        {
-            gameManager.resumeGame();
-        }
+        //if (Input.GetKeyDown(KeyCode.Escape) && !gameManager.isPaused) // Pause Game
+        //{
+        //    gameManager.pauseGame();
+        //}
+        //if (Input.GetKeyDown(KeyCode.Escape) && gameManager.isPaused) // Resume Game
+        //{
+        //    gameManager.resumeGame();
+        //}
 
     }
 
