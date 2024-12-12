@@ -4,26 +4,25 @@ using UnityEngine;
 
 public class DoorManager : MonoBehaviour
 {
-    public bool pushPuzzle;
-    public bool parkourPuzzle;
-    public bool wordPuzzle;
-    public GameObject door;
+    public bool puzzlesCompleted = false;
+    public GameObject door; // Reference to the door GameObject
 
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        // door = GameObject.Find("door"); - this should be whatever the door variable is called
-        pushPuzzle = false;
-        parkourPuzzle = false;
-        wordPuzzle = false;
+        // Ensure door is assigned
+        if (door == null)
+        {
+            door = gameObject; // If not assigned, assume the script is on the door
+        }
+
+        puzzlesCompleted = false;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        if (pushPuzzle && parkourPuzzle && wordPuzzle)
+        if (puzzlesCompleted)
         {
-            // in order for this to work, attach this script to the door
+            // Deactivate the door when puzzles are completed
             door.SetActive(false);
         }
     }
