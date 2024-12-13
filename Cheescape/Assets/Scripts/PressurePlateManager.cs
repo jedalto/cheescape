@@ -8,8 +8,13 @@ public class PressurePlateManager : MonoBehaviour
     public DoorManager doorManager; // Reference to the DoorManager script
     private bool allPlatesEverActivated = false;
 
+    private int activatedCount = 0; // Tracks the number of plates activated
+
     private void Start()
     {
+        // Initialize text with progress count
+        UpdateCompletionText();
+
         // Ensure doorManager is assigned
         if (doorManager == null)
         {
@@ -22,23 +27,29 @@ public class PressurePlateManager : MonoBehaviour
         // Only check if we haven't already completed the puzzle
         if (!allPlatesEverActivated)
         {
-            // Check if all plates are activated at least once
-            bool allPressed = true;
+            // Count how many plates have been activated
+            int currentActivatedCount = 0;
             foreach (PressurePlate plate in pressurePlates)
             {
-                if (!plate.HasEverBeenActivated)
+                if (plate.HasEverBeenActivated)
                 {
-                    allPressed = false;
-                    break;
+                    currentActivatedCount++;
                 }
             }
 
-            // Update the UI text and door state
-            if (allPressed)
+            // Check if there's a change in the activated count
+            if (currentActivatedCount != activatedCount)
+            {
+                activatedCount = currentActivatedCount;
+                UpdateCompletionText();
+            }
+
+            // If all plates are activated
+            if (activatedCount == pressurePlates.Length)
             {
                 allPlatesEverActivated = true;
-                Debug.Log("All plates have been activated!");
-                completionText.text = "All Plates Activated!";
+                Debug.Log("All objectives achieved!");
+                completionText.text = "All Objectives Achieved! The door is open.";
 
                 // Set the puzzles completed flag on the door manager
                 if (doorManager != null)
@@ -50,10 +61,15 @@ public class PressurePlateManager : MonoBehaviour
                     Debug.LogWarning("DoorManager reference is missing!");
                 }
             }
-            else
-            {
-                completionText.text = "";
-            }
+        }
+    }
+
+    private void UpdateCompletionText()
+    {
+        if (!allPlatesEverActivated)
+        {
+            completionText.text = $"{activatedCount} of {pressurePlates.Length} objectives achieved.";
         }
     }
 }
+
