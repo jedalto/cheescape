@@ -5,6 +5,8 @@ public class PressurePlate : MonoBehaviour
     public GameObject requiredBlock; // The specific block that activates this pressure plate
     public GameObject targetObject; // The object to activate, e.g., a door
 
+    [SerializeField] private AudioClip plateSound;
+
     // Track if the plate has ever been activated
     public bool HasEverBeenActivated { get; private set; }
 
@@ -19,6 +21,7 @@ public class PressurePlate : MonoBehaviour
         // Check if the object entering is the required block
         if (other.gameObject == requiredBlock)
         {
+            AudioSource.PlayClipAtPoint(plateSound, transform.position, 1f);
             // If this is the first activation, record the time
             if (!HasEverBeenActivated)
             {

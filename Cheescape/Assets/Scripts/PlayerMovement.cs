@@ -38,6 +38,14 @@ public class PlayerMovement : MonoBehaviour
     public Animator animator;
     public bool speed;
 
+    // sound variables
+    public AudioSource runSound;
+
+    public AudioSource jumpClip;
+
+    [SerializeField] private AudioClip buttonNoise;
+    
+
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -103,6 +111,7 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            jumpClip.Play();
         }
 
         // Camera update for custom camera
@@ -114,6 +123,7 @@ public class PlayerMovement : MonoBehaviour
         // Handle camera swapping
         if (Input.GetMouseButtonDown(1)) // Right mouse button
         {
+            AudioSource.PlayClipAtPoint(buttonNoise, transform.position, 1f);
             SwapCameras();
         }
 
@@ -133,6 +143,34 @@ public class PlayerMovement : MonoBehaviour
         //{
         //    gameManager.resumeGame();
         //}
+
+        
+
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            if (!runSound.isPlaying)
+            {
+                runSound.Play();
+            }
+        }
+        if (Input.GetKeyUp(KeyCode.S))
+        {
+            runSound.Stop();
+        }
+
+        
+
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            if (!runSound.isPlaying)
+            {
+                runSound.Play();
+            }
+        }
+        if (Input.GetKeyUp(KeyCode.W))
+        {
+            runSound.Stop();
+        }
 
     }
 

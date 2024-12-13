@@ -11,6 +11,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject losePanel;
     //[SerializeField] private Text youWin;
 
+    [SerializeField] private AudioClip buttonNoise;
+    [SerializeField] private AudioClip dieNoise;
+
     public bool isPaused = false;
     public bool isGameWon = false; // New flag to track game win state
 
@@ -97,6 +100,7 @@ public class GameManager : MonoBehaviour
         // Check for Escape key to toggle pause (only if game is not won)
         if (Input.GetKeyDown(KeyCode.Escape) && !isGameWon)
         {
+            AudioSource.PlayClipAtPoint(buttonNoise, transform.position, 1f);
             if (!isPaused)
             {
                 pauseGame();
@@ -116,6 +120,7 @@ public class GameManager : MonoBehaviour
             }
             else
             {
+                AudioSource.PlayClipAtPoint(dieNoise, transform.position, 1f);
                 Debug.Log("Time has run out!");
                 timeRemaining = 0;
                 timerIsRunning = false;
